@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ShopEasy FAQ Chatbot</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: #fff;
+            width: 100%;
+            max-width: 520px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #667eea;
+            color: #fff;
+            padding: 16px 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #chat-box {
+            height: 380px;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #f4f6ff;
+        }
+
+        .msg {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .bot {
+            align-self: flex-start;
+            background: #fff;
+            color: #222;
+            border: 1px solid #e2e6f5;
+        }
+
+        .user {
+            align-self: flex-end;
+            background: #667eea;
+            color: #fff;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            padding: 12px;
+            border-top: 1px solid #eee;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 12px;
+            font-size: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+        }
+
+        #user-input:focus { outline: none; border-color: #667eea; }
+
+        #send-btn {
+            padding: 0 20px;
+            font-size: 15px;
+            color: #fff;
+            background: #667eea;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #send-btn:hover { background: #5a67d8; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">🛍️ ShopEasy Support Bot</div>
+
+        <div id="chat-box"></div>
+
+        <div class="input-row">
+            <input type="text" id="user-input" placeholder="Type your question..." autocomplete="off">
+            <button id="send-btn" type="button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById("chat-box");
+        const input = document.getElementById("user-input");
+        const sendBtn = document.getElementById("send-btn");
+
+        function addMessage(text, who) {
+            const div = document.createElement("div");
+            div.className = "msg " + who;
+            div.textContent = text;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const question = input.value.trim();
+            if (!question) return;
+
+            addMessage(question, "user");
+            input.value = "";
+
+            try {
+                const res = await fetch("/ask/?q=" + encodeURIComponent(question));
+                const data = await res.json();
+                addMessage(data.answer, "bot");
+            } catch (err) {
+                addMessage("Something went wrong. Please try again.", "bot");
+            }
+        }
+
+        sendBtn.addEventListener("click", sendMessage);
+        input.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") sendMessage();
+        });
+
+        addMessage("Hi! I'm the ShopEasy assistant. Ask me about delivery, returns, payments or support.", "bot");
+    </script>
+</body>
+</html>
